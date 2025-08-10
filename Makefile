@@ -13,7 +13,7 @@ OVMF              ?= $(BUILD_DIR)/snp-release/usr/local/share/qemu/DIRECT_BOOT_O
 KERNEL_DIR        ?= $(BUILD_DIR)/kernel
 KERNEL            ?= $(KERNEL_DIR)/boot/vmlinuz-*
 INITRD            ?= $(BUILD_DIR)/initramfs.cpio.gz
-ROOT              ?= /dev/sda1
+ROOT              ?= /dev/sda
 KERNEL_CMDLINE    ?= console=ttyS0 earlyprintk=serial root=$(ROOT)
 
 MEMORY            ?= 4096
@@ -54,15 +54,22 @@ VM_CONF_TEMPLATE   = $(GUEST_DIR)/vm-config-template.toml
 VM_CONFIG_FILE     = $(GUEST_DIR)/vm-config.toml
 VM_CONFIG_PARAMS   = -ovmf $(OVMF_PATH) -kernel $(KERNEL_PATH) -initrd $(INITRD_PATH) -template $(VM_CONF_TEMPLATE) -cpus $(CPUS) -policy $(POLICY)
 
+# Test run params
 TEST_BOOT_PARAMS   ?= boot=normal
+ENCRYPTED_BOOT_TEST ?= boot=encrypted-no-attestation
 
 run:
 	sudo -E $(QEMU_LAUNCH_SCRIPT) $(QEMU_DEF_PARAMS) $(QEMU_EXTRA_PARAMS) -hda $(IMAGE_PATH)
 
 run_direct_boot:
+	./guest-vm/create-vm-config.sh $(VM_CONFIG_PARAMS) -cmdline "console=ttyS0 earlyprintk=serial root=/dev/sda1 $(TEST_BOOT_PARAMS)" -out $(VM_CONFIG_FILE)
+	sudo -E $(QEMU_LAUNCH_SCRIPT) $(QEMU_DEF_PARAMS) $(QEMU_DIRECT_BOOT_PARAMS) -hda $(IMAGE_PATH) -load-config $(VM_CONFIG_FILE)
+
+run_encrypted_rootfs_boot:
 # 	./guest-vm/create-vm-config.sh $(VM_CONFIG_PARAMS) -cmdline "$(KERNEL_CMDLINE) $(TEST_BOOT_PARAMS)" -out $(VM_CONFIG_FILE)
 # 	sleep 5
-	sudo -E $(QEMU_LAUNCH_SCRIPT) $(QEMU_DEF_PARAMS) $(QEMU_DIRECT_BOOT_PARAMS) $(QEMU_KERNEL_PARAMS) -hda $(IMAGE_PATH)
+	./guest-vm/create-vm-config.sh $(VM_CONFIG_PARAMS) -cmdline "console=ttyS0 earlyprintk=serial root=/dev/sda $(ENCRYPTED_BOOT_TEST)" -out $(VM_CONFIG_FILE)
+	sudo -E $(QEMU_LAUNCH_SCRIPT) $(QEMU_DEF_PARAMS) $(QEMU_DIRECT_BOOT_PARAMS) -hda $(LUKS_IMAGE) -load-config $(VM_CONFIG_FILE)
 
 run_setup:
 	sudo -E $(QEMU_LAUNCH_SCRIPT) $(QEMU_DEF_PARAMS) $(QEMU_EXTRA_PARAMS) -hda $(IMAGE_PATH) -hdb $(CLOUD_CONFIG)
@@ -109,9 +116,9 @@ create_new_vm: init_dir
 # 	mkdir -p $(BUILD_DIR)/verity
 # 	./guest-vm/setup_verity.sh -image $(IMAGE) -out-image $(VERITY_IMAGE) -out-hash-tree $(VERITY_HASH_TREE) -out-root-hash $(VERITY_ROOT_HASH)
 
-# setup_luks:
-# 	mkdir -p $(BUILD_DIR)/luks
-# 	./guest-vm/setup_luks.sh -in $(IMAGE) -out $(LUKS_IMAGE)
+setup_luks:
+	mkdir -p $(BUILD_DIR)/luks
+	./guest-vm/setup_luks.sh -in $(IMAGE) -out $(LUKS_IMAGE)
 
 fetch_vm_config_template: init_dir
 	cp $(VM_CONF_PATH) $(VM_CONF_TEMPLATE)

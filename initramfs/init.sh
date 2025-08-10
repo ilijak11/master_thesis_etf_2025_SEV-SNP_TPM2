@@ -85,6 +85,37 @@ boot_encrypted() {
     mount /dev/mapper/"$ROOT_FS_CRYPTDEV" $MNT_DIR
 }
 
+boot_encrypted_no_attestation() {
+    echo "Booting encrypted filesystem without attestation.."
+
+    #kernel module for accessing the PSP from the guest
+    #used for getting the attestation report
+    #modprobe sev-guest
+
+    #kernel module for networking
+    #modprobe virtio_net
+
+    # assign IP address
+    #dhclient
+
+    #start network server handle attestation + disk pw receival
+    # /bin/server || exit 1
+    # PW=$(cat ./disk_key.txt)
+    # shred -u ./disk_key.txt
+
+    ROOT_FS_CRYPTDEV="$(basename $ROOT)_crypt"
+    #echo "${PW}" | 
+    cryptsetup luksOpen "$ROOT" "$ROOT_FS_CRYPTDEV"
+
+    #activate lvm2 (used by ubuntu as default when using crypto disk)
+    # vgscan --mknodes
+    # vgchange -ay
+    # vgscan --mknodes
+    # mount /dev/mapper/ubuntu--vg-ubuntu--lv $MNT_DIR
+
+    mount /dev/mapper/"$ROOT_FS_CRYPTDEV" $MNT_DIR
+}
+
 boot_verity() {
     echo "Booting dm-verity filesystem.."
 
@@ -124,14 +155,18 @@ modprobe virtio_scsi
 tpm2_pcrread
 echo "********* HELLO FROM INITRAMFS *********"
 echo "********* BOOTING WITH ROOT: $ROOT *********"
+echo "********* BOOTING WITH BOOT OPTION: $BOOT *********"
 ls /dev | grep sd
-ls /dev | grep vd
-sleep 5
+#ls /dev | grep vd
+sleep 10
+echo "********* EXECUTING BOOT *********"
 
 if [ $BOOT = "normal" ]; then
     boot_normal
 elif [ $BOOT = "encrypted" ]; then
     boot_encrypted
+elif [ $BOOT = "encrypted-no-attestation" ]; then
+    boot_encrypted_no_attestation
 elif [ $BOOT = "verity" ]; then
     boot_verity
 else
