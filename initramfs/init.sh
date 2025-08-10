@@ -152,6 +152,7 @@ boot_verity() {
 #we need this module to detect the disk supplied with "-hda"
 modprobe virtio_scsi
 
+# initially readout vTPM PCR values
 tpm2_pcrread
 echo "********* HELLO FROM INITRAMFS *********"
 echo "********* BOOTING WITH ROOT: $ROOT *********"
