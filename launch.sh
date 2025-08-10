@@ -454,6 +454,7 @@ add_opts "-monitor pty -monitor unix:${MONITOR_PATH},server,nowait"
 
 add_opts "-qmp tcp:localhost:4444,server,wait=off"
 
+# vTPM emulation inside guest
 #******** ADD TPM ********
 swtpm socket -d --tpmstate dir=/root/swtpm/tpm/ --ctrl type=unixio,path=/root/swtpm/swtpm-sock --log level=20 --tpm2
 add_opts "-chardev socket,id=chrtpm,path=/root/swtpm/swtpm-sock -tpmdev emulator,id=tpm0,chardev=chrtpm -device tpm-tis,tpmdev=tpm0"
