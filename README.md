@@ -1,3 +1,17 @@
+### CVM attestation AMD SEV-SNP + TPM 2.0
+This project aims to add additional attestation method using vTPM to existing project: [SNPGuard](https://github.com/SNPGuard/snp-guard) which implements AMD SEV-SNP attestation on CVM
+SNPGuard provides tools (scripts) for building all necessary components for SEV-SNP attestation such as: 
+* host kernel modifications, 
+* guest kernel modifications, 
+* qemu/kvm modifications, 
+* Makefile to run commands for instantiating CVMs
+
+This project provides modifications to enumerated tools and furher adds **vTPM** attestation capability to existing RUST attestation binaries to **initramfs**
+
+Complete SNPGuard documentation can be foung [here](https://github.com/SNPGuard/snp-guard/blob/main/README.md)
+
+Following are steps to createa and run CVMs in various modes:
+
 ## GENERATING VM
 - prepare host
 ```shell
