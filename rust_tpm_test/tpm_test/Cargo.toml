@@ -1,0 +1,19 @@
+[package]
+name = "tpm_test"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "read_pcr"
+path = "src/bin/read_pcr.rs"
+
+[[bin]]
+name = "generate_quote"
+path = "src/bin/generate_quote.rs"
+
+[dependencies]
+tss-esapi = "7.6.0"
+log = "0.4"
+env_logger = "0.10"
+base64 = "0.22.1"
+openssl = "0.10.66"
