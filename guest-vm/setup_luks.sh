@@ -17,7 +17,8 @@ ROOT_HASH=roothash.txt
 NON_INTERACTIVE=""
 
 #Paramters for the encryption
-LUKS_PARAMS="--cipher aes-xts-random --integrity hmac-sha256"
+#LUKS_PARAMS="--cipher aes-xts-random --integrity hmac-sha256"
+LUKS_PARAMS=""
 
 SCRIPT_PATH=$(realpath `dirname $0`)
 . $SCRIPT_PATH/common.sh
