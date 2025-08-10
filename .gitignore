@@ -1,2 +1,11 @@
-/build
+build
+.cache/
+tools/attestation_server/target
+AMDSEV/
+build.env
+stdout.log
+monitor
+
+rust_tpm_test/swtpm_test
+rust_tpm_test/tpm_test/target
 *.qcow2
