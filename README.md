@@ -23,6 +23,7 @@ Following are steps to createa and run CVMs in various modes:
 * additionally install swtpm to emulate vTPM inside guest
 ```shell
 sudo apt update
+sudo apt install qemu-kvm
 sudo apt install libtss2-dev tmp2-tools swtpm swtpm-tools
 ```
 
