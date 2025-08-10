@@ -1,5 +1,5 @@
 # CVM attestation AMD SEV-SNP + TPM 2.0
-This project aims to add additional attestation method using vTPM to existing project: [SNPGuard](https://github.com/SNPGuard/snp-guard) which implements AMD SEV-SNP attestation on CVM
+This project aims to add additional attestation method using vTPM to existing project: [SNPGuard](https://github.com/SNPGuard/snp-guard), which implements AMD SEV-SNP attestation on CVMs.
 SNPGuard provides tools (scripts) for building all necessary components for SEV-SNP attestation such as: 
 * host kernel modifications, 
 * guest kernel modifications, 
