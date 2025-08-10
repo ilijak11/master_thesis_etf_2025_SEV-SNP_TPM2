@@ -61,10 +61,12 @@ ENCRYPTED_BOOT_TEST ?= boot=encrypted-no-attestation
 run:
 	sudo -E $(QEMU_LAUNCH_SCRIPT) $(QEMU_DEF_PARAMS) $(QEMU_EXTRA_PARAMS) -hda $(IMAGE_PATH)
 
+# Run guest with custom initramfs (normla boot)
 run_direct_boot:
 	./guest-vm/create-vm-config.sh $(VM_CONFIG_PARAMS) -cmdline "console=ttyS0 earlyprintk=serial root=/dev/sda1 $(TEST_BOOT_PARAMS)" -out $(VM_CONFIG_FILE)
 	sudo -E $(QEMU_LAUNCH_SCRIPT) $(QEMU_DEF_PARAMS) $(QEMU_DIRECT_BOOT_PARAMS) -hda $(IMAGE_PATH) -load-config $(VM_CONFIG_FILE)
 
+# Run guest with encrypted rootfs (no attestation)
 run_encrypted_rootfs_boot:
 # 	./guest-vm/create-vm-config.sh $(VM_CONFIG_PARAMS) -cmdline "$(KERNEL_CMDLINE) $(TEST_BOOT_PARAMS)" -out $(VM_CONFIG_FILE)
 # 	sleep 5
