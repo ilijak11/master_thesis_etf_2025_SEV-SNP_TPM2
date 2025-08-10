@@ -6,7 +6,7 @@ SNPGuard provides tools (scripts) for building all necessary components for SEV-
 * qemu/kvm modifications, 
 * Makefile to run commands for instantiating CVMs
 
-Complete SNPGuard documentation can be foung [here](https://github.com/SNPGuard/snp-guard/blob/main/README.md)
+Complete SNPGuard documentation can be found [here](https://github.com/SNPGuard/snp-guard/blob/main/README.md).
 
 This project provides modifications to enumerated tools and furher adds **vTPM** attestation capability to existing RUST attestation binaries to **initramfs**
 The vTPM is emulated in guest using **swtpm**. Initramfs has access to /dev/tpm0 and is able to generate a quote over PCR values.
