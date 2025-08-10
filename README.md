@@ -12,8 +12,20 @@ Complete SNPGuard documentation can be foung [here](https://github.com/SNPGuard/
 
 Following are steps to createa and run CVMs in various modes:
 
+## Install dependencies
+* install dependencies by running:
+```shell
+./install-dependencies.sh
+```
+
+* additionally install swtpm to emulate vTPM inside guest
+```shell
+sudo apt update
+sudo apt install libtss2-dev tmp2-tools swtpm swtpm-tools
+```
+
 ## GENERATING VM
-- prepare host
+* prepare host
 ```shell
 mkdir -p build && cd build
 wget https://github.com/SNPGuard/snp-guard/releases/download/v0.1.2/snp-release.tar.gz
@@ -43,7 +55,7 @@ scp -P 2222 build/snp-release/linux/guest/*.deb guest@localhost:
 ## rm -rf ~/.ssh/known_hosts ## only if no other hosts 
 ```
 
-- inside guest: 
+* inside guest: 
 ```shell
 # install kernel and headers (copied before)
 # This is needed even when running direct boot, as we still need access to the kernel module files
@@ -59,26 +71,26 @@ sudo systemctl disable multipathd.service
 sudo shutdown now
 ```
 
-- prepare VM config template
+* prepare VM config template
 ```shell
 make fetch_vm_config_template
 ```
 
 
 ## GENERATING AND RUNNING DIRRECT BOOT (custom initramfs)
-- run encrypted boot option (no attestation)
+* run encrypted boot option (no attestation)
 ```shell
 make  make run_direct_boot
 ```
 
 ## GENERATING AND RUNNING ENCRYPTED VM
-- create image with encrypted rootfs
+* create image with encrypted rootfs
 ```shell
 make setup_luks
 #password: password
 ```
 
-- run encrypted boot option (no attestation)
+* run encrypted boot option (no attestation)
 ```shell
 make run_encrypted_rootfs_boot
 ```
