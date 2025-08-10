@@ -34,6 +34,13 @@ wget https://github.com/SNPGuard/snp-guard/releases/download/v0.1.2/snp-release.
 tar -xf snp-release.tar.gz
 cd ..
 
+#Installing SNP avare kernel
+cd build/snp-release
+sudo ./install.sh
+# reboot and selecting correct boot option required
+
+cd ~
+
 # Unpack kernel to ./build/kernel
 make unpack_kernel
 
