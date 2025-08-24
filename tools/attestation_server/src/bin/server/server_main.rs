@@ -4,7 +4,8 @@ use std::{env, fs::File, io::Write, str};
 use attestation_server::{
     req_resp_ds::{aead_dec, AttestationRequest, WrappedDiskKey},
     snp_attestation::{MockSNPAttestation, QuerySNPAttestation, SNPAttestation},
-    vtpm_attestation::{get_vtpm_quote, VTPMQuote}
+    vtpm_attestation::{get_vtpm_quote, VTPMQuote},
+    attestation_report::AttestationReportResponse,
 };
 use ring::{
     agreement::{self, EphemeralPrivateKey},
@@ -29,12 +30,6 @@ struct Config {
     no_secret_injection: bool,
     mock_mode: bool,
     listen : String,
-}
-
-#[derive(serde::Serialize, serde::Deserialize)]
-struct AttestationReportResponse {
-    snp_att_report: AttestationReport,
-    vtpm_quote: VTPMQuote,
 }
 
 struct SecretInjectionParams {
