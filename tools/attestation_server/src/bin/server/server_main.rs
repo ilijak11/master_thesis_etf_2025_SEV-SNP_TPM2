@@ -83,12 +83,8 @@ fn send_report(mut req:  Request, config: &Config) -> Result<SecretInjectionPara
         vtpm_quote,
     };
 
-
     let att_report_json =
         serde_json::to_string(&att_report).whatever_context("failed to serialize attestation report as json")?;
-
-    println!("RESPONSE: {:#?}", att_report_json);
-
     let header =
         tiny_http::Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).expect("should never happen");
     let resp = Response::from_string(att_report_json).with_header(header);

@@ -83,9 +83,9 @@ pub fn validate_quote(
     let signature: Signature = Signature::unmarshall(&signature_bytes)?;
     let ak_pub: Public = Public::unmarshall(&ak_pub_bytes)?;
 
-    println!("Attestation: {:?}", attest);
-    println!("Signature: {:?}", signature);
-    println!("AK Public: {:?}", ak_pub);
+    //println!("Attestation: {:?}", attest);
+    //println!("Signature: {:?}", signature);
+    //println!("AK Public: {:?}", ak_pub);
 
     // Check nonce in quote matches expected nonce
     let extra_data = attest.extra_data();
@@ -213,8 +213,6 @@ pub fn get_quote(nonce: u64) -> Result<(Attest, Signature, Public), Box<dyn std:
     //Generate nonce
     let nonce = Data::try_from(nonce.to_be_bytes().to_vec())?;
 
-    println!("Nonce: {:?}", nonce);
-
     // Define the PCR selection list
     let pcr_selection_list = PcrSelectionListBuilder::new()
     .with_selection(HashingAlgorithm::Sha256, &[PcrSlot::Slot0, PcrSlot::Slot1])
@@ -228,9 +226,9 @@ pub fn get_quote(nonce: u64) -> Result<(Attest, Signature, Public), Box<dyn std:
         pcr_selection_list
     )?;
 
-    println!("Attestation: {:?}", attest);
-    println!("Signature: {:?}", signature);
-    println!("AK Public: {:?}", ak_public);
+    //println!("Attestation: {:?}", attest);
+    //println!("Signature: {:?}", signature);
+    //println!("AK Public: {:?}", ak_public);
 
     Ok((attest, signature, ak_public))
 }
@@ -243,11 +241,11 @@ pub fn get_vtpm_quote(nonce: u64) -> Result<VTPMQuote, Box<dyn std::error::Error
     let ak_pub_marsh = ak_pub.marshall().expect("Failed to marshal AK public key");
 
     let att_b64 = base64::encode(att_marsh);
-    println!("digest b64: {}", att_b64);
+    //println!("digest b64: {}", att_b64);
     let sig_b64 = base64::encode(sig_marsh);
-    println!("sig b64: {}", sig_b64);
+    //println!("sig b64: {}", sig_b64);
     let ak_pub_b64 = base64::encode(ak_pub_marsh);
-    println!("ak pubkey b64: {}", ak_pub_b64);
+    //println!("ak pubkey b64: {}", ak_pub_b64);
 
     Ok(VTPMQuote {
         attest: att_b64,
