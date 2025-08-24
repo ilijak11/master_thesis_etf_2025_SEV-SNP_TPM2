@@ -63,7 +63,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let ak_pub_b64 = base64::encode(ak_pub_marsh);
     println!("ak pubkey b64: {}", ak_pub_b64);
 
-    validate_quote(&att_b64, &sig_b64, &ak_pub_b64, &nonce.to_be_bytes().to_vec())?;
+    validate_quote(&att_b64, &sig_b64, &ak_pub_b64, nonce)?;
 
     Ok(())
 }
@@ -72,7 +72,7 @@ pub fn validate_quote(
     attest_b64: &str,
     signature_b64: &str,
     ak_pub_b64: &str,
-    nonce: &Vec<u8>
+    nonce: u64
 ) -> Result<(), Box<dyn std::error::Error>> {
 
     let attest_bytes = base64::decode(attest_b64)?;
@@ -89,7 +89,7 @@ pub fn validate_quote(
 
     // Check nonce in quote matches expected nonce
     let extra_data = attest.extra_data();
-    if extra_data.value() != nonce {
+    if extra_data.value() != nonce.to_be_bytes().to_vec() {
         return Err("Nonce in quote does not match expected nonce".into());
     }
 
@@ -132,6 +132,13 @@ pub fn validate_quote(
     println!("Quote verified successfully!");
 
     Ok(())
+}
+
+pub fn validate_vtpm_quote(
+    quote: &VTPMQuote,
+    nonce: u64
+) -> Result<(), Box<dyn std::error::Error>> {
+    validate_quote(&quote.attest, &quote.signature, &quote.ak_pub, nonce)
 }
 
 pub fn get_quote(nonce: u64) -> Result<(Attest, Signature, Public), Box<dyn std::error::Error>> {

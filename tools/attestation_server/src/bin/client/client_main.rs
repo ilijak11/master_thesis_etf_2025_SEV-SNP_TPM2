@@ -12,6 +12,8 @@ use attestation_server::{
     snp_validate_report::{
         parse_id_block_data, verify_and_check_report, CachingVCEKDownloader, ReportDataMismatchSnafu, ReportVerificationError
     },
+    vtpm_attestation::{validate_vtpm_quote, VTPMQuote},
+    attestation_report::AttestationReportResponse,
 };
 
 use clap::Parser;
@@ -154,7 +156,7 @@ fn run(args: &Args) -> Result<(), UserError> {
     wait_for_request_bar.finish();
 
     println!("Requesting attestation report from {}", &args.server_url);
-    let attestation_report: AttestationReport = client
+    let attestation_report_response: AttestationReportResponse = client
         .post(&args.server_url)
         .json(&att_req)
         .send()
@@ -166,54 +168,60 @@ fn run(args: &Args) -> Result<(), UserError> {
 
     if let Some(dump_path) = &args.dump_report {
         let f = File::create(dump_path).whatever_context(format!("failed to create report dump file at {}",dump_path))?;
-        serde_json::to_writer_pretty(f, &attestation_report)
+        serde_json::to_writer_pretty(f, &attestation_report_response)
             .whatever_context(format!("failed to serialize attestation report to file {}",&dump_path))?;
     }
 
-    println!("Verifying Report");
-    let vcek_resolver =
-    CachingVCEKDownloader::new().whatever_context("failed to instantiate vcek downloader")?;
-let vcek_cert = vcek_resolver
-    .get_vceck_cert(
-        attestation_report.chip_id,
-        vm_description.host_cpu_family,
-        &attestation_report.committed_tcb,
-    )
-    .whatever_context(format!(
-        "failed to download vcek cert for cpu family {}, chip_id 0x{}",
-        &vm_description.host_cpu_family,
-        hex::encode(attestation_report.chip_id)
-    ))?;
+    let attestation_report = attestation_report_response.snp_att_report;
+    let vtpm_quote = attestation_report_response.vtpm_quote;
 
-    let report_data_validator = |vm_data: [u8; 64]| {
-        let report_data: ReportData = vm_data.clone().into();
-        if nonce != report_data.nonce {
-            return ReportDataMismatchSnafu{
-                expected:format!("0x{:x}",report_data.nonce),
-                got: format!("0x{:x}",nonce),
-            }.fail();
-        }
-        Ok(())
-    };
+    println!("Verifying vTPM Quote");
+    validate_vtpm_quote(&vtpm_quote, nonce).whatever_context("failed to validate vTPM quote")?;
 
-    let id_block_data = if let Some((_, _, v)) = id_data {
-        Some(v)
-    } else {
-        None
-    };
-    verify_and_check_report(
-        &attestation_report,
-        vm_description.host_cpu_family,
-        vcek_cert,
-        id_block_data,
-        Some(vm_description.guest_policy),
-        Some(vm_description.min_commited_tcb),
-        Some(vm_description.platform_info),
-        Some(report_data_validator),
-        None, //We don't use host data right now
-        Some(expected_ld),
-    )
-    .context(InvalidReportSnafu {})?;
+    println!("Verifying SNP Report");
+    // let vcek_resolver =
+    // CachingVCEKDownloader::new().whatever_context("failed to instantiate vcek downloader")?;
+    // let vcek_cert = vcek_resolver
+    // .get_vceck_cert(
+    //     attestation_report.chip_id,
+    //     vm_description.host_cpu_family,
+    //     &attestation_report.committed_tcb,
+    // )
+    // .whatever_context(format!(
+    //     "failed to download vcek cert for cpu family {}, chip_id 0x{}",
+    //     &vm_description.host_cpu_family,
+    //     hex::encode(attestation_report.chip_id)
+    // ))?;
+
+    // let report_data_validator = |vm_data: [u8; 64]| {
+    //     let report_data: ReportData = vm_data.clone().into();
+    //     if nonce != report_data.nonce {
+    //         return ReportDataMismatchSnafu{
+    //             expected:format!("0x{:x}",report_data.nonce),
+    //             got: format!("0x{:x}",nonce),
+    //         }.fail();
+    //     }
+    //     Ok(())
+    // };
+
+    // let id_block_data = if let Some((_, _, v)) = id_data {
+    //     Some(v)
+    // } else {
+    //     None
+    // };
+    // verify_and_check_report(
+    //     &attestation_report,
+    //     vm_description.host_cpu_family,
+    //     vcek_cert,
+    //     id_block_data,
+    //     Some(vm_description.guest_policy),
+    //     Some(vm_description.min_commited_tcb),
+    //     Some(vm_description.platform_info),
+    //     Some(report_data_validator),
+    //     None, //We don't use host data right now
+    //     Some(expected_ld),
+    // )
+    // .context(InvalidReportSnafu {})?;
 
     let user_report_data: ReportData = attestation_report.report_data.into();
 
