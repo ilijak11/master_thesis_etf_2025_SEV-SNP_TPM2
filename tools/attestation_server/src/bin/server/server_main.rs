@@ -4,6 +4,7 @@ use std::{env, fs::File, io::Write, str};
 use attestation_server::{
     req_resp_ds::{aead_dec, AttestationRequest, WrappedDiskKey},
     snp_attestation::{MockSNPAttestation, QuerySNPAttestation, SNPAttestation},
+    vtpm_attestation::{get_vtpm_quote, VTPMQuote}
 };
 use ring::{
     agreement::{self, EphemeralPrivateKey},
@@ -28,6 +29,12 @@ struct Config {
     no_secret_injection: bool,
     mock_mode: bool,
     listen : String,
+}
+
+#[derive(serde::Serialize, serde::Deserialize)]
+struct AttestationReportResponse {
+    snp_att_report: AttestationReport,
+    vtpm_quote: VTPMQuote,
 }
 
 struct SecretInjectionParams {
@@ -60,7 +67,7 @@ fn send_report(mut req:  Request, config: &Config) -> Result<SecretInjectionPara
 
 
     ///fetch snp attestation report
-    let att_report: AttestationReport = if config.mock_mode {
+    let snp_att_report: AttestationReport = if config.mock_mode {
         MockSNPAttestation::get_report(att_req.nonce, server_public_key)
             .whatever_context("failed to get mock attestation reort")?
     } else {
@@ -68,13 +75,25 @@ fn send_report(mut req:  Request, config: &Config) -> Result<SecretInjectionPara
             .whatever_context("failed to request attestation report from secure processor")?
     };
 
-    ///fetch vTPM PCRs
-    ///TODO
+    println!("Got attestation report.");
 
+    //fetch vTPM PCRs
+    let vtpm_quote = get_vtpm_quote(att_req.nonce).whatever_context("failed to get vTPM quote")?;
+
+    println!("Got vtpm quote");
     println!("Got attestation report. Sending it to client");
+
+    let att_report = AttestationReportResponse {
+        snp_att_report,
+        vtpm_quote,
+    };
+
 
     let att_report_json =
         serde_json::to_string(&att_report).whatever_context("failed to serialize attestation report as json")?;
+
+    println!("RESPONSE: {:#?}", att_report_json);
+
     let header =
         tiny_http::Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).expect("should never happen");
     let resp = Response::from_string(att_report_json).with_header(header);

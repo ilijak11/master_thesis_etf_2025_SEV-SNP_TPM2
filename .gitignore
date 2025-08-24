@@ -8,4 +8,5 @@ monitor
 
 rust_tpm_test/swtpm_test
 rust_tpm_test/tpm_test/target
+tools/attestation_server/target
 *.qcow2

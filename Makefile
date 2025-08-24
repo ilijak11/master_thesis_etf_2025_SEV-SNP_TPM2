@@ -40,7 +40,7 @@ VERITY_PARAMS     ?= boot=verity verity_disk=/dev/sdb verity_roothash=`cat $(VER
 
 LUKS_IMAGE        ?= $(BUILD_DIR)/luks/image.qcow2
 LUKS_PARAMS       ?= boot=encrypted
-LUKS_KEY          ?=
+LUKS_KEY          ?= password
 
 QEMU_LAUNCH_SCRIPT = ./launch.sh
 QEMU_DEF_PARAMS    = -default-network -log $(BUILD_DIR)/stdout.log -mem $(MEMORY) -smp $(CPUS)
@@ -125,9 +125,9 @@ setup_luks:
 fetch_vm_config_template: init_dir
 	cp $(VM_CONF_PATH) $(VM_CONF_TEMPLATE)
 
-# attest_luks_vm:
-# 	$(BIN_DIR)/client --disk-key $(LUKS_KEY) --vm-definition $(VM_CONFIG_FILE) --dump-report $(BUILD_DIR)/luks/attestation_report.json
-# 	rm -rf $(SSH_HOSTS_FILE)
+attest_luks_vm:
+	$(BIN_DIR)/client --disk-key $(LUKS_KEY) --vm-definition $(VM_CONFIG_FILE) --dump-report $(BUILD_DIR)/luks/attestation_report.json
+	rm -rf $(SSH_HOSTS_FILE)
 
 # attest_verity_vm:
 # 	./attestation/attest-verity.sh -vm-config $(VM_CONFIG_FILE) -host $(VM_HOST) -port $(VM_PORT) -user $(VM_USER)
