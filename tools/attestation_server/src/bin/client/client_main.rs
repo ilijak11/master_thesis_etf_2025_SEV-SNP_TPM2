@@ -76,6 +76,10 @@ struct Args {
     ///that the attestation report contains the corresponding data. If used, you also need to
     ///specify `id_block_path`
     author_block_path: Option<String>,
+
+    #[arg(long)]
+    ///Skip verification of the SNP attestation report
+    no_snp_varification: bool,
 }
 
 #[snafu::report]
@@ -179,49 +183,53 @@ fn run(args: &Args) -> Result<(), UserError> {
     validate_vtpm_quote(&vtpm_quote, nonce).whatever_context("failed to validate vTPM quote")?;
 
     println!("Verifying SNP Report");
-    // let vcek_resolver =
-    // CachingVCEKDownloader::new().whatever_context("failed to instantiate vcek downloader")?;
-    // let vcek_cert = vcek_resolver
-    // .get_vceck_cert(
-    //     attestation_report.chip_id,
-    //     vm_description.host_cpu_family,
-    //     &attestation_report.committed_tcb,
-    // )
-    // .whatever_context(format!(
-    //     "failed to download vcek cert for cpu family {}, chip_id 0x{}",
-    //     &vm_description.host_cpu_family,
-    //     hex::encode(attestation_report.chip_id)
-    // ))?;
+    if !&args.no_snp_varification {
+        let vcek_resolver =
+        CachingVCEKDownloader::new().whatever_context("failed to instantiate vcek downloader")?;
+        let vcek_cert = vcek_resolver
+        .get_vceck_cert(
+            attestation_report.chip_id,
+            vm_description.host_cpu_family,
+            &attestation_report.committed_tcb,
+        )
+        .whatever_context(format!(
+            "failed to download vcek cert for cpu family {}, chip_id 0x{}",
+            &vm_description.host_cpu_family,
+            hex::encode(attestation_report.chip_id)
+        ))?;
 
-    // let report_data_validator = |vm_data: [u8; 64]| {
-    //     let report_data: ReportData = vm_data.clone().into();
-    //     if nonce != report_data.nonce {
-    //         return ReportDataMismatchSnafu{
-    //             expected:format!("0x{:x}",report_data.nonce),
-    //             got: format!("0x{:x}",nonce),
-    //         }.fail();
-    //     }
-    //     Ok(())
-    // };
+        let report_data_validator = |vm_data: [u8; 64]| {
+            let report_data: ReportData = vm_data.clone().into();
+            if nonce != report_data.nonce {
+                return ReportDataMismatchSnafu{
+                    expected:format!("0x{:x}",report_data.nonce),
+                    got: format!("0x{:x}",nonce),
+                }.fail();
+            }
+            Ok(())
+        };
 
-    // let id_block_data = if let Some((_, _, v)) = id_data {
-    //     Some(v)
-    // } else {
-    //     None
-    // };
-    // verify_and_check_report(
-    //     &attestation_report,
-    //     vm_description.host_cpu_family,
-    //     vcek_cert,
-    //     id_block_data,
-    //     Some(vm_description.guest_policy),
-    //     Some(vm_description.min_commited_tcb),
-    //     Some(vm_description.platform_info),
-    //     Some(report_data_validator),
-    //     None, //We don't use host data right now
-    //     Some(expected_ld),
-    // )
-    // .context(InvalidReportSnafu {})?;
+        let id_block_data = if let Some((_, _, v)) = id_data {
+            Some(v)
+        } else {
+            None
+        };
+        verify_and_check_report(
+            &attestation_report,
+            vm_description.host_cpu_family,
+            vcek_cert,
+            id_block_data,
+            Some(vm_description.guest_policy),
+            Some(vm_description.min_commited_tcb),
+            Some(vm_description.platform_info),
+            Some(report_data_validator),
+            None, //We don't use host data right now
+            Some(expected_ld),
+        )
+        .context(InvalidReportSnafu {})?;
+    } else {
+        println!("Skipping SNP attestation report verification");
+    }
 
     let user_report_data: ReportData = attestation_report.report_data.into();
 

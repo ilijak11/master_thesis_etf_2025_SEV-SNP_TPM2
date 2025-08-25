@@ -132,6 +132,10 @@ attest_luks_vm:
 	$(BIN_DIR)/client --disk-key $(LUKS_KEY) --vm-definition $(VM_CONFIG_FILE) --dump-report $(BUILD_DIR)/luks/attestation_report.json
 	rm -rf $(SSH_HOSTS_FILE)
 
+attest_encypted_vm_no_snp_verification:
+	$(BIN_DIR)/client --disk-key $(LUKS_KEY) --vm-definition $(VM_CONFIG_FILE) --dump-report $(BUILD_DIR)/luks/attestation_report.json --no-snp-varification
+	rm -rf $(SSH_HOSTS_FILE)
+
 # attest_verity_vm:
 # 	./attestation/attest-verity.sh -vm-config $(VM_CONFIG_FILE) -host $(VM_HOST) -port $(VM_PORT) -user $(VM_USER)
 
