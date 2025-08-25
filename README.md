@@ -105,18 +105,13 @@ make setup_luks
 make run_encrypted_rootfs_boot
 ```
 
-* run encrypted boot option (no attestation)
-```shell
-make run_encrypted_rootfs_boot
-```
-
 * run encrypted boot option (attestation, mock SEV-SNP report)
-    * start guest
 ```shell
+#start guest
 make run_encrypted_rootfs_boot_attested
 ```
-    * attest guest
 ```shell
+#attest guest (in another terminal)
 make attest_encypted_vm_no_snp_verification
 ```
 
