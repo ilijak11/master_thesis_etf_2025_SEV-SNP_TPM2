@@ -90,7 +90,7 @@ make fetch_vm_config_template
 ## GENERATING AND RUNNING DIRRECT BOOT (custom initramfs)
 * run encrypted boot option (no attestation)
 ```shell
-make  make run_direct_boot
+make run_direct_boot
 ```
 
 ## GENERATING AND RUNNING ENCRYPTED VM
@@ -104,3 +104,19 @@ make setup_luks
 ```shell
 make run_encrypted_rootfs_boot
 ```
+
+* run encrypted boot option (no attestation)
+```shell
+make run_encrypted_rootfs_boot
+```
+
+* run encrypted boot option (attestation, mock SEV-SNP report)
+    * start guest
+```shell
+make run_encrypted_rootfs_boot_attested
+```
+    * attest guest
+```shell
+make attest_encypted_vm_no_snp_verification
+```
+
