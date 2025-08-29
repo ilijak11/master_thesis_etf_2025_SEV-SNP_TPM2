@@ -9,7 +9,8 @@ CLOUD_CONFIG      ?= $(GUEST_DIR)/config-blob.img
 HEADERS_DEB       ?= $(SNP_DIR)/linux/guest/linux-headers-*.deb
 KERNEL_DEB        ?= $(SNP_DIR)/linux/guest/linux-image-*.deb
 
-OVMF              ?= $(BUILD_DIR)/snp-release/usr/local/share/qemu/DIRECT_BOOT_OVMF.fd
+#OVMF              ?= $(BUILD_DIR)/snp-release/usr/local/share/qemu/DIRECT_BOOT_OVMF.fd
+OVMF			  ?= ovmf/OVMF.fd
 KERNEL_DIR        ?= $(BUILD_DIR)/kernel
 KERNEL            ?= $(KERNEL_DIR)/boot/vmlinuz-*
 INITRD            ?= $(BUILD_DIR)/initramfs.cpio.gz
@@ -64,17 +65,17 @@ run:
 # Run guest with custom initramfs (normal boot)
 run_direct_boot:
 	./guest-vm/create-vm-config.sh $(VM_CONFIG_PARAMS) -cmdline "console=ttyS0 earlyprintk=serial root=/dev/sda1 $(TEST_BOOT_PARAMS)" -out $(VM_CONFIG_FILE)
-	sudo -E $(QEMU_LAUNCH_SCRIPT) $(QEMU_DEF_PARAMS) $(QEMU_DIRECT_BOOT_PARAMS) -hda $(IMAGE_PATH) -load-config $(VM_CONFIG_FILE)
+	sudo -E $(QEMU_LAUNCH_SCRIPT) $(QEMU_DEF_PARAMS) -hda $(IMAGE_PATH) -load-config $(VM_CONFIG_FILE)
 
 # Run guest with encrypted rootfs (no attestation)
 run_encrypted_rootfs_boot:
 	./guest-vm/create-vm-config.sh $(VM_CONFIG_PARAMS) -cmdline "console=ttyS0 earlyprintk=serial root=/dev/sda $(ENCRYPTED_BOOT_TEST)" -out $(VM_CONFIG_FILE)
-	sudo -E $(QEMU_LAUNCH_SCRIPT) $(QEMU_DEF_PARAMS) $(QEMU_DIRECT_BOOT_PARAMS) -hda $(LUKS_IMAGE) -load-config $(VM_CONFIG_FILE)
+	sudo -E $(QEMU_LAUNCH_SCRIPT) $(QEMU_DEF_PARAMS) -hda $(LUKS_IMAGE) -load-config $(VM_CONFIG_FILE)
 
 # Run guest with encrypted rootfs (attestation)
 run_encrypted_rootfs_boot_attested:
 	./guest-vm/create-vm-config.sh $(VM_CONFIG_PARAMS) -cmdline "console=ttyS0 earlyprintk=serial root=/dev/sda $(ENCRYPTED_BOOT_ATTESTATION_TEST)" -out $(VM_CONFIG_FILE)
-	sudo -E $(QEMU_LAUNCH_SCRIPT) $(QEMU_DEF_PARAMS) $(QEMU_DIRECT_BOOT_PARAMS) -hda $(LUKS_IMAGE) -load-config $(VM_CONFIG_FILE)
+	sudo -E $(QEMU_LAUNCH_SCRIPT) $(QEMU_DEF_PARAMS) -hda $(LUKS_IMAGE) -load-config $(VM_CONFIG_FILE)
 
 run_setup:
 	sudo -E $(QEMU_LAUNCH_SCRIPT) $(QEMU_DEF_PARAMS) $(QEMU_EXTRA_PARAMS) -hda $(IMAGE_PATH) -hdb $(CLOUD_CONFIG)
