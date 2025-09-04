@@ -190,7 +190,7 @@ fn run(args: &Args) -> Result<(), UserError> {
         .get_vceck_cert(
             attestation_report.chip_id,
             vm_description.host_cpu_family,
-            &attestation_report.committed_tcb,
+            &attestation_report.reported_tcb, //committed_tcb,
         )
         .whatever_context(format!(
             "failed to download vcek cert for cpu family {}, chip_id 0x{}",

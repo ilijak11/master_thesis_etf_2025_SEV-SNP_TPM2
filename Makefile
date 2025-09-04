@@ -10,7 +10,7 @@ HEADERS_DEB       ?= $(SNP_DIR)/linux/guest/linux-headers-*.deb
 KERNEL_DEB        ?= $(SNP_DIR)/linux/guest/linux-image-*.deb
 
 #OVMF              ?= $(BUILD_DIR)/snp-release/usr/local/share/qemu/DIRECT_BOOT_OVMF.fd
-OVMF			  ?= ovmf/OVMF.fd
+OVMF			  ?= ovmf/SEV_SNP_OVMF.fd
 KERNEL_DIR        ?= $(BUILD_DIR)/kernel
 KERNEL            ?= $(KERNEL_DIR)/boot/vmlinuz-*
 INITRD            ?= $(BUILD_DIR)/initramfs.cpio.gz
@@ -70,12 +70,12 @@ run_direct_boot:
 # Run guest with encrypted rootfs (no attestation)
 run_encrypted_rootfs_boot:
 	./guest-vm/create-vm-config.sh $(VM_CONFIG_PARAMS) -cmdline "console=ttyS0 earlyprintk=serial root=/dev/sda $(ENCRYPTED_BOOT_TEST)" -out $(VM_CONFIG_FILE)
-	sudo -E $(QEMU_LAUNCH_SCRIPT) $(QEMU_DEF_PARAMS) -hda $(LUKS_IMAGE) -load-config $(VM_CONFIG_FILE)
+	sudo -E $(QEMU_LAUNCH_SCRIPT) $(QEMU_DEF_PARAMS) $(QEMU_SNP_PARAMS) -hda $(LUKS_IMAGE) -load-config $(VM_CONFIG_FILE)
 
 # Run guest with encrypted rootfs (attestation)
 run_encrypted_rootfs_boot_attested:
 	./guest-vm/create-vm-config.sh $(VM_CONFIG_PARAMS) -cmdline "console=ttyS0 earlyprintk=serial root=/dev/sda $(ENCRYPTED_BOOT_ATTESTATION_TEST)" -out $(VM_CONFIG_FILE)
-	sudo -E $(QEMU_LAUNCH_SCRIPT) $(QEMU_DEF_PARAMS) -hda $(LUKS_IMAGE) -load-config $(VM_CONFIG_FILE)
+	sudo -E $(QEMU_LAUNCH_SCRIPT) $(QEMU_DEF_PARAMS) $(QEMU_SNP_PARAMS) -hda $(LUKS_IMAGE) -load-config $(VM_CONFIG_FILE)
 
 run_setup:
 	sudo -E $(QEMU_LAUNCH_SCRIPT) $(QEMU_DEF_PARAMS) $(QEMU_EXTRA_PARAMS) -hda $(IMAGE_PATH) -hdb $(CLOUD_CONFIG)
@@ -135,6 +135,10 @@ attest_luks_vm:
 
 attest_encypted_vm_no_snp_verification:
 	$(BIN_DIR)/client --disk-key $(LUKS_KEY) --vm-definition $(VM_CONFIG_FILE) --dump-report $(BUILD_DIR)/luks/attestation_report.json --no-snp-varification
+	rm -rf $(SSH_HOSTS_FILE)
+
+attest_encypted_vm:
+	$(BIN_DIR)/client --disk-key $(LUKS_KEY) --vm-definition $(VM_CONFIG_FILE) --dump-report $(BUILD_DIR)/luks/attestation_report.json
 	rm -rf $(SSH_HOSTS_FILE)
 
 # attest_verity_vm:
