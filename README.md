@@ -24,7 +24,7 @@ Following are steps to createa and run CVMs in various modes:
 ```shell
 sudo apt update
 sudo apt install qemu-kvm
-sudo apt install libtss2-dev tmp2-tools swtpm swtpm-tools
+sudo apt install libtss2-dev tpm2-tools swtpm swtpm-tools
 ```
 
 ## GENERATING VM
@@ -40,7 +40,11 @@ cd build/snp-release
 sudo ./install.sh
 # reboot and selecting correct boot option required
 
-cd ~
+cd ../..
+
+# create directories for tpm state
+mkdir -p ~/swtpm/tpm
+swtpm_setup --tpm-state ./swtpm/tpm/ --tpm2 --create-ek-cert --create-platform-cert --lock-nvram
 
 # Unpack kernel to ./build/kernel
 make unpack_kernel
