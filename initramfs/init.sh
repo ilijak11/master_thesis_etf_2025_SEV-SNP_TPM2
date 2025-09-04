@@ -121,7 +121,7 @@ boot_encrypted_attestation_vtpm() {
 
     #kernel module for accessing the PSP from the guest
     #used for getting the attestation report
-    #modprobe sev-guest
+    modprobe sev-guest
 
     #kernel module for networking
     modprobe virtio_net
@@ -130,7 +130,7 @@ boot_encrypted_attestation_vtpm() {
     dhclient
 
     #start network server handle attestation + disk pw receival
-    export MOCK=1
+    #export MOCK=1
     export TPM2TOOLS_TCTI=device:/dev/tpmrm0
     /bin/server || exit 1
     PW=$(cat ./disk_key.txt)
